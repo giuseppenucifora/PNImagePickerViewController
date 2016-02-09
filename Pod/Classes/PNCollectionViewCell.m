@@ -8,12 +8,12 @@
 
 #import "PNCollectionViewCell.h"
 #import <PureLayout/PureLayout.h>
-#import <MMMaterialDesignSpinner/MMMaterialDesignSpinner.h>
+#import <DGActivityIndicatorView/DGActivityIndicatorView.h>
 
 @interface PNCollectionViewCell()
 
 @property (nonatomic, strong) UIImageView *photoImageView;
-@property (nonatomic, strong) MMMaterialDesignSpinner *loadingSpinner;
+@property (nonatomic, strong) DGActivityIndicatorView *loadingSpinner;
 
 @end
 
@@ -35,7 +35,11 @@
 
         [self.contentView addSubview:_photoImageView];
 
-        _loadingSpinner = [MMMaterialDesignSpinner newAutoLayoutView];
+        _loadingSpinner = [[DGActivityIndicatorView alloc] initWithType:DGActivityIndicatorAnimationTypeBallClipRotate tintColor:[[UIColor lightGrayColor] colorWithAlphaComponent:0.7] size:35];
+        [_loadingSpinner setTranslatesAutoresizingMaskIntoConstraints:NO];
+        [self.contentView addSubview:_loadingSpinner];
+
+        [_loadingSpinner startAnimating];
     }
     return self;
 }
@@ -56,12 +60,17 @@
         [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:8];
         [_photoImageView autoAlignAxisToSuperviewAxis:ALAxisVertical];
         [_photoImageView autoAlignAxisToSuperviewAxis:ALAxisHorizontal];
+
+
+        [_loadingSpinner autoAlignAxisToSuperviewAxis:ALAxisHorizontal];
+        [_loadingSpinner autoAlignAxisToSuperviewAxis:ALAxisVertical];
     }
 }
 
 - (void) setPhotoImage:(UIImage *)photoImage {
     if (photoImage) {
         [_photoImageView setImage:photoImage];
+        [_loadingSpinner stopAnimating];
     }
 }
 
