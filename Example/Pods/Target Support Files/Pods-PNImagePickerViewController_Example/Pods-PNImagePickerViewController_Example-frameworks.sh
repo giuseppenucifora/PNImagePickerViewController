@@ -84,10 +84,12 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_framework "Pods-PNImagePickerViewController_Example/DGActivityIndicatorView.framework"
   install_framework "Pods-PNImagePickerViewController_Example/PNImagePickerViewController.framework"
   install_framework "Pods-PNImagePickerViewController_Example/PureLayout.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
+  install_framework "Pods-PNImagePickerViewController_Example/DGActivityIndicatorView.framework"
   install_framework "Pods-PNImagePickerViewController_Example/PNImagePickerViewController.framework"
   install_framework "Pods-PNImagePickerViewController_Example/PureLayout.framework"
 fi

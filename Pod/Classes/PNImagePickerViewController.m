@@ -12,6 +12,7 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 #import "PNCollectionViewCell.h"
 #import "NSString+HexColor.h"
+#import <PureLayout/PureLayout.h>
 
 
 #pragma mark - PNImagePickerViewController -
@@ -25,17 +26,20 @@
 @property (nonatomic) NSTimeInterval animationTime;
 
 @property (nonatomic, strong) UIViewController *targetController;
-@property (nonatomic, strong) UIWindow *window;
 
 @property (nonatomic, strong) UIView *backgroundView;
 @property (nonatomic, strong) UIView *imagePickerView;
+@property (nonatomic, strong) UIView *separator1;
+@property (nonatomic, strong) UIView *separator2;
+@property (nonatomic, strong) UIView *separator3;
 
-@property (nonatomic) CGRect imagePickerFrame;
-@property (nonatomic) CGRect hiddenFrame;
+@property (nonatomic, strong) NSLayoutConstraint *hideConstraint;
 
 @property (nonatomic) TransitionDelegate *transitionController;
 
 @property (nonatomic, strong) NSMutableArray *assets;
+
+@property (nonatomic, assign) BOOL didUpdateConstraints;
 
 @end
 
@@ -47,110 +51,179 @@
 - (id)init {
     self = [super init];
     if (self) {
-        self.assets = [[NSMutableArray alloc] init];
+        _assets = [[NSMutableArray alloc] init];
         _targetSize = CGSizeMake(1024, 1024);
-        [self setupView];
+        _haveCamera = [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera];
+        _animationTime = 0.4;
+
+
     }
     return self;
 }
 
-- (void)setupView {
+- (void) viewDidLoad {
+    [super viewDidLoad];
+
     self.view.backgroundColor = [UIColor clearColor];
-    self.window = [UIApplication sharedApplication].keyWindow;
-
-    self.haveCamera = [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera];
-    CGFloat localImagePickerHeight = imagePickerHeight;
-    if (!self.haveCamera) {
-        localImagePickerHeight -= 47.0f;
-    }
-    self.imagePickerFrame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height-localImagePickerHeight, [UIScreen mainScreen].bounds.size.width, localImagePickerHeight);
-    self.hiddenFrame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width, localImagePickerHeight);
-    self.imagePickerView = [[UIView alloc] initWithFrame:self.hiddenFrame];
-    self.imagePickerView.backgroundColor = [UIColor whiteColor];
 
 
+    _imagePickerView = [UIView newAutoLayoutView];
+    [_imagePickerView setBackgroundColor:[UIColor whiteColor]];
 
-    self.backgroundView = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    self.backgroundView.backgroundColor = [UIColor colorWithWhite:0.1 alpha:0.7];
-    self.backgroundView.alpha = 0;
+    _backgroundView = [UIView newAutoLayoutView];
+    _backgroundView.backgroundColor = [UIColor colorWithWhite:0.1 alpha:0.7];
+    _backgroundView.alpha = 0;
     UITapGestureRecognizer *dismissTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss)];
-    self.backgroundView.userInteractionEnabled = YES;
-    [self.backgroundView addGestureRecognizer:dismissTap];
+    _backgroundView.userInteractionEnabled = YES;
+    [_backgroundView addGestureRecognizer:dismissTap];
 
+    [self.view addSubview:_backgroundView];
 
-
-    self.animationTime = 0.2;
-
-    [self.window addSubview:self.backgroundView];
-    [self.window addSubview:self.imagePickerView];
-
-    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, self.imagePickerView.frame.size.width, 50)];
-    [btn setTitle:@"Hello!" forState:UIControlStateNormal];
-    [btn setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
-    [btn addTarget:self action:@selector(setDefaults) forControlEvents:UIControlEventTouchUpInside];
-
-    [self.imagePickerView addSubview:btn];
-
-    [self imagePickerViewSetup];
-    [self getCameraRollImages];
-}
-
-- (void)imagePickerViewSetup {
-    CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
-
-    const CGRect collectionViewFrame = CGRectMake(7, 8, screenWidth-7-7, 122);
-    const CGRect libraryBtnFrame = CGRectMake(0, 149, screenWidth, 30);
-    const CGRect cameraBtnFrame = CGRectMake(0, self.haveCamera ? 196 : 0, screenWidth, 30);
-    const CGRect cancelBtnFrame = CGRectMake(0, self.haveCamera ? 242 : 196, screenWidth, 30);
 
     UICollectionViewFlowLayout *aFlowLayout = [[UICollectionViewFlowLayout alloc] init];
     [aFlowLayout setScrollDirection:UICollectionViewScrollDirectionHorizontal];
-    self.collectionView = [[UICollectionView alloc] initWithFrame:collectionViewFrame collectionViewLayout:aFlowLayout];
-    [self.collectionView setBackgroundColor:[UIColor whiteColor]];
-    self.collectionView.showsHorizontalScrollIndicator = NO;
-    self.collectionView.showsVerticalScrollIndicator = NO;
-    self.collectionView.delegate = self;
-    self.collectionView.dataSource = self;
-    [self.collectionView registerClass:[PNCollectionViewCell class] forCellWithReuseIdentifier:[PNCollectionViewCell cellIdentifier]];
+
+    _collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 0, 0) collectionViewLayout:aFlowLayout];
+    [_collectionView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_collectionView setBackgroundColor:[UIColor whiteColor]];
+    _collectionView.showsHorizontalScrollIndicator = NO;
+    _collectionView.showsVerticalScrollIndicator = NO;
+    _collectionView.delegate = self;
+    _collectionView.dataSource = self;
+    [_collectionView registerClass:[PNCollectionViewCell class] forCellWithReuseIdentifier:[PNCollectionViewCell cellIdentifier]];
 
     UIFont *btnFont = [UIFont systemFontOfSize:19.0];
 
-    self.photoLibraryBtn = [[UIButton alloc] initWithFrame:libraryBtnFrame];
-    [self.photoLibraryBtn setTitle:@"Photo Library" forState:UIControlStateNormal];
-    self.photoLibraryBtn.titleLabel.font = btnFont;
-    [self.photoLibraryBtn addTarget:self action:@selector(selectFromLibraryWasPressed) forControlEvents:UIControlEventTouchUpInside];
+    _photoLibraryBtn = [UIButton newAutoLayoutView];
+    [_photoLibraryBtn setTitle:NSLocalizedString(@"Photo Library",@"") forState:UIControlStateNormal];
+    _photoLibraryBtn.titleLabel.font = btnFont;
+    [_photoLibraryBtn addTarget:self action:@selector(selectFromLibraryWasPressed) forControlEvents:UIControlEventTouchUpInside];
+    [_photoLibraryBtn setTitleColor:[@"0b60fe" colorFromHex] forState:UIControlStateNormal];
+    [_photoLibraryBtn setTitleColor:[@"70b3fd" colorFromHex] forState:UIControlStateHighlighted];
 
-    self.cameraBtn = [[UIButton alloc] initWithFrame:cameraBtnFrame];
-    [self.cameraBtn setTitle:@"Take Photo" forState:UIControlStateNormal];
-    self.cameraBtn.titleLabel.font = btnFont;
-    [self.cameraBtn addTarget:self action:@selector(takePhotoWasPressed) forControlEvents:UIControlEventTouchUpInside];
-    self.cameraBtn.hidden = !self.haveCamera;
+    _cancelBtn = [UIButton newAutoLayoutView];
+    [_cancelBtn setTitle:NSLocalizedString(@"Cancel",@"") forState:UIControlStateNormal];
+    _cancelBtn.titleLabel.font = btnFont;
+    [_cancelBtn addTarget:self action:@selector(dismiss) forControlEvents:UIControlEventTouchUpInside];
+    [_cancelBtn setTitleColor:[@"0b60fe" colorFromHex] forState:UIControlStateNormal];
+    [_cancelBtn setTitleColor:[@"70b3fd" colorFromHex] forState:UIControlStateHighlighted];
 
-    self.cancelBtn = [[UIButton alloc] initWithFrame:cancelBtnFrame];
-    [self.cancelBtn setTitle:@"Cancel" forState:UIControlStateNormal];
-    self.cancelBtn.titleLabel.font = btnFont;
-    [self.cancelBtn addTarget:self action:@selector(dismiss) forControlEvents:UIControlEventTouchUpInside];
 
-    for (UIButton *btn in @[self.photoLibraryBtn, self.cameraBtn, self.cancelBtn]) {
-        [btn setTitleColor:[@"0b60fe" colorFromHex] forState:UIControlStateNormal];
-        [btn setTitleColor:[@"70b3fd" colorFromHex] forState:UIControlStateHighlighted];
+
+    _separator2 = [UIView newAutoLayoutView];
+    _separator2.backgroundColor = [@"cacaca" colorFromHex];
+    [_imagePickerView addSubview:_separator2];
+
+    _separator3 = [UIView newAutoLayoutView];
+    _separator3.backgroundColor = [@"cacaca" colorFromHex];
+    [_imagePickerView addSubview:_separator3];
+
+    if(_haveCamera) {
+        _cameraBtn = [UIButton newAutoLayoutView];
+        [_cameraBtn setTitle:NSLocalizedString(@"Take Photo",@"") forState:UIControlStateNormal];
+        _cameraBtn.titleLabel.font = btnFont;
+        [_cameraBtn addTarget:self action:@selector(takePhotoWasPressed) forControlEvents:UIControlEventTouchUpInside];
+        [_cameraBtn setTitleColor:[@"0b60fe" colorFromHex] forState:UIControlStateNormal];
+        [_cameraBtn setTitleColor:[@"70b3fd" colorFromHex] forState:UIControlStateHighlighted];
+        _cameraBtn.hidden = !_haveCamera;
+        [_imagePickerView addSubview:_cameraBtn];
+
+        _separator1 = [UIView newAutoLayoutView];
+        _separator1.backgroundColor = [@"cacaca" colorFromHex];
+        [_imagePickerView addSubview:_separator1];
     }
 
-    UIView *separator1 = [[UIView alloc] initWithFrame:CGRectMake(0, 140, screenWidth, 1)];
-    separator1.backgroundColor = [@"cacaca" colorFromHex];
-    [self.imagePickerView addSubview:separator1];
 
-    UIView *separator2 = [[UIView alloc] initWithFrame:CGRectMake(25, 187, screenWidth-25, 1)];
-    separator2.backgroundColor = [@"cacaca" colorFromHex];
-    [self.imagePickerView addSubview:separator2];
-    UIView *separator3 = [[UIView alloc] initWithFrame:CGRectMake(25, 234, screenWidth-25, 1)];
-    separator3.backgroundColor = [@"cacaca" colorFromHex];
-    [self.imagePickerView addSubview:separator3];
+    [_imagePickerView addSubview:_collectionView];
+    [_imagePickerView addSubview:_photoLibraryBtn];
+    [_imagePickerView addSubview:_cancelBtn];
 
-    [self.imagePickerView addSubview:self.collectionView];
-    [self.imagePickerView addSubview:self.photoLibraryBtn];
-    [self.imagePickerView addSubview:self.cameraBtn];
-    [self.imagePickerView addSubview:self.cancelBtn];
+    [self.view addSubview:_imagePickerView];
+
+    [self.view setNeedsUpdateConstraints];
+    [_imagePickerView setNeedsUpdateConstraints];
+    [_collectionView setNeedsUpdateConstraints];
+    [_backgroundView setNeedsUpdateConstraints];
+
+}
+
+- (void) updateViewConstraints {
+    if (!_didUpdateConstraints) {
+        _didUpdateConstraints = YES;
+
+        [_backgroundView autoPinEdgesToSuperviewEdges];
+
+        [_imagePickerView autoPinEdgeToSuperviewEdge:ALEdgeLeading];
+        [_imagePickerView autoPinEdgeToSuperviewEdge:ALEdgeTrailing];
+        _hideConstraint = [_imagePickerView autoPinEdgeToSuperviewEdge:ALEdgeBottom withInset:-imagePickerHeight];
+        [_imagePickerView autoSetDimension:ALDimensionHeight toSize:100 relation:NSLayoutRelationGreaterThanOrEqual];
+
+
+        [_cancelBtn autoPinEdgeToSuperviewEdge:ALEdgeLeading];
+        [_cancelBtn autoPinEdgeToSuperviewEdge:ALEdgeTrailing];
+        [_cancelBtn autoAlignAxisToSuperviewAxis:ALAxisVertical];
+        [_cancelBtn autoPinEdgeToSuperviewEdge:ALEdgeBottom withInset:15];
+        [_cancelBtn autoSetDimension:ALDimensionHeight toSize:30];
+        [_cancelBtn autoPinEdgeToSuperviewEdge:ALEdgeLeading withInset:10];
+        [_cancelBtn autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:10];
+
+        [_separator3 autoPinEdgeToSuperviewEdge:ALEdgeLeading withInset:10];
+        [_separator3 autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:10];
+        [_separator3 autoPinEdge:ALEdgeBottom toEdge:ALEdgeTop ofView:_cancelBtn withOffset:-10];
+        [_separator3 autoAlignAxisToSuperviewAxis:ALAxisVertical];
+        [_separator3 autoSetDimension:ALDimensionHeight toSize:1];
+
+        [_photoLibraryBtn autoPinEdgeToSuperviewEdge:ALEdgeLeading];
+        [_photoLibraryBtn autoPinEdgeToSuperviewEdge:ALEdgeTrailing];
+        [_photoLibraryBtn autoAlignAxisToSuperviewAxis:ALAxisVertical];
+        [_photoLibraryBtn autoSetDimension:ALDimensionHeight toSize:30];
+        [_photoLibraryBtn autoPinEdge:ALEdgeBottom toEdge:ALEdgeTop ofView:_separator3 withOffset:-10];
+        [_photoLibraryBtn autoPinEdgeToSuperviewEdge:ALEdgeLeading withInset:10];
+        [_photoLibraryBtn autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:10];
+
+        [_separator2 autoPinEdgeToSuperviewEdge:ALEdgeLeading withInset:10];
+        [_separator2 autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:10];
+        [_separator2 autoPinEdge:ALEdgeBottom toEdge:ALEdgeTop ofView:_photoLibraryBtn withOffset:-10];
+        [_separator2 autoAlignAxisToSuperviewAxis:ALAxisVertical];
+        [_separator2 autoSetDimension:ALDimensionHeight toSize:1];
+
+        if (_haveCamera) {
+            [_cameraBtn autoPinEdgeToSuperviewEdge:ALEdgeLeading];
+            [_cameraBtn autoPinEdgeToSuperviewEdge:ALEdgeTrailing];
+            [_cameraBtn autoAlignAxisToSuperviewAxis:ALAxisVertical];
+            [_cameraBtn autoSetDimension:ALDimensionHeight toSize:30];
+            [_cameraBtn autoPinEdge:ALEdgeBottom toEdge:ALEdgeTop ofView:_separator2 withOffset:-10];
+            [_cameraBtn autoPinEdgeToSuperviewEdge:ALEdgeLeading withInset:10];
+            [_cameraBtn autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:10];
+
+            [_separator1 autoPinEdgeToSuperviewEdge:ALEdgeLeading withInset:10];
+            [_separator1 autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:10];
+            [_separator1 autoPinEdge:ALEdgeBottom toEdge:ALEdgeTop ofView:_cameraBtn withOffset:-10];
+            [_separator1 autoAlignAxisToSuperviewAxis:ALAxisVertical];
+            [_separator1 autoSetDimension:ALDimensionHeight toSize:1];
+        }
+
+        [_collectionView autoPinEdgeToSuperviewEdge:ALEdgeLeading];
+        [_collectionView autoPinEdgeToSuperviewEdge:ALEdgeTrailing];
+        [_collectionView autoAlignAxisToSuperviewAxis:ALAxisVertical];
+        [_collectionView autoSetDimension:ALDimensionHeight toSize:122];
+        if (_haveCamera) {
+            [_collectionView autoPinEdge:ALEdgeBottom toEdge:ALEdgeTop ofView:_separator1 withOffset:-15];
+        }
+        else {
+            [_collectionView autoPinEdge:ALEdgeBottom toEdge:ALEdgeTop ofView:_separator2 withOffset:-15];
+        }
+
+        [_collectionView autoPinEdgeToSuperviewEdge:ALEdgeTop withInset:10];
+
+    }
+    [super updateViewConstraints];
+}
+
+- (void) viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+
+    [self getCameraRollImages];
 }
 
 #pragma mark - Collection view
@@ -160,13 +233,13 @@
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return MIN(20, self.assets.count);
+    return MIN(20, _assets.count);
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     PNCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:[PNCollectionViewCell cellIdentifier] forIndexPath:indexPath];
 
-    PHAsset *asset = self.assets[self.assets.count-1 - indexPath.row];
+    PHAsset *asset = _assets[_assets.count-1 - indexPath.row];
 
     PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
     options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
@@ -201,7 +274,7 @@
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     [collectionView deselectItemAtIndexPath:indexPath animated:YES];
 
-    PHAsset *asset = self.assets[self.assets.count-1 - indexPath.row];
+    PHAsset *asset = _assets[_assets.count-1 - indexPath.row];
     PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
     options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
     options.networkAccessAllowed = YES;
@@ -237,32 +310,31 @@
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
-    return CGSizeMake(170, 114);
+    return CGSizeMake(180, 120);
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
-    return 10.0f;
+    return 0.0f;
 }
 
 #pragma mark - Image library
 
 
 - (void)getCameraRollImages {
-	_assets = [@[] mutableCopy];
+
     dispatch_async(dispatch_get_main_queue(), ^{
 
         PHFetchOptions *allPhotosOptions = [PHFetchOptions new];
         allPhotosOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:YES]];
+        //[allPhotosOptions setFetchLimit:20];
 
         PHFetchResult *allPhotosResult = [PHAsset fetchAssetsWithMediaType:PHAssetMediaTypeImage options:allPhotosOptions];
         [allPhotosResult enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL *stop) {
-            NSLog(@"asset %@", asset);
             if(asset) {
-                [self.assets addObject:asset];
+                [_assets addObject:asset];
             }
         }];
-
-        [self.collectionView reloadData];
+		[_collectionView reloadData];
     });
 }
 
@@ -320,34 +392,49 @@
 }
 
 - (void)showImagePickerInController:(UIViewController *)controller animated:(BOOL)animated {
-    if (self.isVisible != YES) {
+    if (_isVisible != YES) {
         if ([delegate respondsToSelector:@selector(imagePickerWillOpen)]) {
             [delegate imagePickerWillOpen];
         }
-        self.isVisible = YES;
+        _isVisible = YES;
 
         [self setTransitioningDelegate:transitionController];
         self.modalPresentationStyle = UIModalPresentationOverCurrentContext;
 
-        [controller presentViewController:self animated:NO completion:nil];
+        [controller presentViewController:self animated:NO completion:^{
 
-        if (animated) {
-            [UIView animateWithDuration:self.animationTime
-                                  delay:0
-                                options:UIViewAnimationOptionCurveLinear
-                             animations:^{
-                                 [self.imagePickerView setFrame:self.imagePickerFrame];
-                                 [self.backgroundView setAlpha:1];
-                             }
-                             completion:^(BOOL finished) {
-                                 if ([delegate respondsToSelector:@selector(imagePickerDidOpen)]) {
-                                     [delegate imagePickerDidOpen];
+            [_imagePickerView setNeedsUpdateConstraints];
+            [_imagePickerView updateConstraintsIfNeeded];
+
+            if (animated) {
+
+                [UIView animateWithDuration:_animationTime
+                                      delay:0.0
+                     usingSpringWithDamping:1
+                      initialSpringVelocity:0
+                                    options:0
+                                 animations:^{
+
+                                     [_hideConstraint setConstant:0];
+
+                                     [_backgroundView setAlpha:1];
+
+                                     [_imagePickerView layoutIfNeeded];
                                  }
-                             }];
-        } else {
-            [self.imagePickerView setFrame:self.imagePickerFrame];
-            [self.backgroundView setAlpha:0];
-        }
+                                 completion:^(BOOL finished) {
+                                     if ([delegate respondsToSelector:@selector(imagePickerDidOpen)]) {
+                                         [delegate imagePickerDidOpen];
+                                     }
+                                 }];
+            } else {
+                
+                [_hideConstraint setConstant:0];
+                
+                [_backgroundView setAlpha:1];
+                
+                [_imagePickerView layoutIfNeeded];
+            }
+        }];
     }
 }
 
@@ -358,32 +445,49 @@
 }
 
 - (void)dismissAnimated:(BOOL)animated {
-    if (self.isVisible == YES) {
+    if (_isVisible == YES) {
         if ([delegate respondsToSelector:@selector(imagePickerWillClose)]) {
             [delegate imagePickerWillClose];
         }
+        [_imagePickerView setNeedsUpdateConstraints];
+        [_imagePickerView updateConstraintsIfNeeded];
+
         if (animated) {
-            [UIView animateWithDuration:self.animationTime
-                                  delay:0
-                                options:UIViewAnimationOptionCurveEaseIn
+
+            [UIView animateWithDuration:_animationTime
+                                  delay:0.0
+                 usingSpringWithDamping:1
+                  initialSpringVelocity:0
+                                options:0
                              animations:^{
-                                 [self.imagePickerView setFrame:self.hiddenFrame];
-                                 [self.backgroundView setAlpha:0];
+
+                                 [_hideConstraint setConstant:imagePickerHeight];
+
+                                 [_backgroundView setAlpha:0];
+
+                                 [_imagePickerView layoutIfNeeded];
                              }
                              completion:^(BOOL finished) {
-                                 [self.imagePickerView removeFromSuperview];
-                                 [self.backgroundView removeFromSuperview];
-                                 [self dismissViewControllerAnimated:NO completion:nil];
-                                 if ([delegate respondsToSelector:@selector(imagePickerDidClose)]) {
-                                     [delegate imagePickerDidClose];
-                                 }
+                                 [self dismissViewControllerAnimated:YES completion:^{
+                                     if ([delegate respondsToSelector:@selector(imagePickerDidClose)]) {
+                                         [delegate imagePickerDidClose];
+                                     }
+                                 }];
                              }];
         } else {
-            [self.imagePickerView setFrame:self.imagePickerFrame];
-            [self.backgroundView setAlpha:0];
-        }
 
-        // Set everything to nil
+            [_hideConstraint setConstant:imagePickerHeight];
+
+            [_backgroundView setAlpha:0];
+
+            [_imagePickerView layoutIfNeeded];
+
+            [self dismissViewControllerAnimated:NO completion:^{
+                if ([delegate respondsToSelector:@selector(imagePickerDidClose)]) {
+                    [delegate imagePickerDidClose];
+                }
+            }];
+        }
     }
 }
 
@@ -416,12 +520,12 @@
     UIView *inView = [transitionContext containerView];
     UIViewController *toVC = (UIViewController *)[transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
     UIViewController *fromVC = (UIViewController *)[transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
-
+    
     [inView addSubview:toVC.view];
-
+    
     CGRect screenRect = [[UIScreen mainScreen] bounds];
     [toVC.view setFrame:CGRectMake(0, screenRect.size.height, fromVC.view.frame.size.width, fromVC.view.frame.size.height)];
-
+    
     [UIView animateWithDuration:0.25f
                      animations:^{
                          [toVC.view setFrame:CGRectMake(0, 0, fromVC.view.frame.size.width, fromVC.view.frame.size.height)];

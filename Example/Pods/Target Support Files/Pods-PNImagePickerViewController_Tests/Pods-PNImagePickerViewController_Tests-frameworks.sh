@@ -84,6 +84,7 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_framework "Pods-PNImagePickerViewController_Tests/DGActivityIndicatorView.framework"
   install_framework "Pods-PNImagePickerViewController_Tests/PNImagePickerViewController.framework"
   install_framework "Pods-PNImagePickerViewController_Tests/PureLayout.framework"
   install_framework "Pods-PNImagePickerViewController_Tests/Expecta.framework"
@@ -92,6 +93,7 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "Pods-PNImagePickerViewController_Tests/Specta.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
+  install_framework "Pods-PNImagePickerViewController_Tests/DGActivityIndicatorView.framework"
   install_framework "Pods-PNImagePickerViewController_Tests/PNImagePickerViewController.framework"
   install_framework "Pods-PNImagePickerViewController_Tests/PureLayout.framework"
   install_framework "Pods-PNImagePickerViewController_Tests/Expecta.framework"

@@ -16,9 +16,9 @@
 
 - (void)imagePicker:(PNImagePickerViewController *)imagePicker didSelectImage:(UIImage *)image;
 
-- (void)imagePicker:(PNImagePickerViewController *)imagePicker donwloadImageWithProgress:(double )progress;
-
 @optional
+
+- (void)imagePicker:(PNImagePickerViewController *)imagePicker donwloadImageWithProgress:(double )progress;
 
 - (void)imagePickerDidOpen;
 
@@ -63,15 +63,9 @@
 
 
 
-
-
 @interface TransitionDelegate : NSObject <UIViewControllerTransitioningDelegate>
 
 @end
-
-
-
-
 
 
 @interface AnimatedTransitioning : NSObject <UIViewControllerAnimatedTransitioning>
