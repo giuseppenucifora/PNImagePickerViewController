@@ -1,0 +1,6 @@
+framework module PNImagePickerViewController {
+  umbrella header "PNImagePickerViewController-umbrella.h"
+
+  export *
+  module * { export * }
+}

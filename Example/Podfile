@@ -1,11 +1,12 @@
 source 'https://github.com/CocoaPods/Specs.git'
 use_frameworks!
 
-target 'PNImagePickerViewController_Example', :exclusive => true do
+target 'PNImagePickerViewController_Example' do
   pod 'PNImagePickerViewController', :path => '../'
+  pod 'PureLayout'
 end
 
-target 'PNImagePickerViewController_Tests', :exclusive => true do
+target 'PNImagePickerViewController_Tests' do
   pod 'PNImagePickerViewController', :path => '../'
 
   pod 'Specta'
