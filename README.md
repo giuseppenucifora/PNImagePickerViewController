@@ -20,6 +20,26 @@ it, simply add the following line to your Podfile:
 pod "PNImagePickerViewController"
 ```
 
+
+```ruby
+
+#import <PNImagePickerViewController/PNImagePickerViewController.h>
+
+PNImagePickerViewController *imagePicker = [[PNImagePickerViewController alloc] init];
+imagePicker.delegate = self;
+[imagePicker showImagePickerInController:self animated:YES];
+
+
+#pragma mark - PNImagePickerViewControllerDelegate
+
+- (void)imagePicker:(PNImagePickerViewController *)imagePicker didSelectImage:(UIImage *)image {
+    self.imageView.image = image;
+}
+
+
+
+```
+
 ## Author
 
 Giuseppe Nucifora, me@giuseppenucifora.com

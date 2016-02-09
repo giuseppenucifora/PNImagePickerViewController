@@ -32,7 +32,8 @@
 
     _imageView = [UIImageView newAutoLayoutView];
     [_imageView setBackgroundColor:[[UIColor lightGrayColor] colorWithAlphaComponent:0.6]];
-
+    [_imageView setContentMode:UIViewContentModeScaleAspectFit];
+    
     [self.view addSubview:_imageView];
 
     [self.view setNeedsUpdateConstraints];

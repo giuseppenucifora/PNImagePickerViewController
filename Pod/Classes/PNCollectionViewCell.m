@@ -8,10 +8,12 @@
 
 #import "PNCollectionViewCell.h"
 #import <PureLayout/PureLayout.h>
+#import <MMMaterialDesignSpinner/MMMaterialDesignSpinner.h>
 
 @interface PNCollectionViewCell()
 
 @property (nonatomic, strong) UIImageView *photoImageView;
+@property (nonatomic, strong) MMMaterialDesignSpinner *loadingSpinner;
 
 @end
 
@@ -21,20 +23,6 @@
     return [NSStringFromClass([self class]) stringByAppendingString:@"Identifier"];
 }
 
-- (instancetype) init {
-    self = [super init];
-
-    if (self) {
-        [self.contentView setTranslatesAutoresizingMaskIntoConstraints:NO];
-
-        _photoImageView = [UIImageView newAutoLayoutView];
-		[_photoImageView setContentMode:UIViewContentModeScaleAspectFill];
-
-        [self.contentView addSubview:_photoImageView];
-    }
-    return self;
-}
-
 - (instancetype) initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
@@ -42,8 +30,12 @@
 
         _photoImageView = [UIImageView newAutoLayoutView];
         [_photoImageView setContentMode:UIViewContentModeScaleAspectFill];
+        [_photoImageView.layer setCornerRadius:4];
+        [_photoImageView.layer setMasksToBounds:YES];
 
         [self.contentView addSubview:_photoImageView];
+
+        _loadingSpinner = [MMMaterialDesignSpinner newAutoLayoutView];
     }
     return self;
 }
@@ -56,13 +48,12 @@
 
         self.didUpdateConstraints = YES;
 
-
         [self.contentView autoPinEdgesToSuperviewEdges];
 
-        [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeTop withInset:5];
-        [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeBottom withInset:5];
-        [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeLeading withInset:10];
-        [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:10];
+        [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeTop withInset:8];
+        [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeBottom withInset:8];
+        [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeLeading withInset:8];
+        [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:8];
         [_photoImageView autoAlignAxisToSuperviewAxis:ALAxisVertical];
         [_photoImageView autoAlignAxisToSuperviewAxis:ALAxisHorizontal];
     }
