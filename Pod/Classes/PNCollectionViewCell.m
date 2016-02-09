@@ -71,6 +71,7 @@
     if (photoImage) {
         [_photoImageView setImage:photoImage];
         [_loadingSpinner stopAnimating];
+        [_loadingSpinner setAlpha:0];
     }
 }
 

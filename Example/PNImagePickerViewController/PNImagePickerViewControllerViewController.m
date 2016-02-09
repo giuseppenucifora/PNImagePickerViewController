@@ -15,6 +15,7 @@
 @property (nonatomic) BOOL didSetupConstraints;
 @property (nonatomic, strong) UIButton *button;
 @property (nonatomic, strong) UIImageView *imageView;
+@property (nonatomic, strong) PNImagePickerViewController *imagePickerController;
 
 @end
 
@@ -66,9 +67,11 @@
 
 - (void) showPicker {
 
-    PNImagePickerViewController *imagePicker = [[PNImagePickerViewController alloc] init];
-    imagePicker.delegate = self;
-    [imagePicker showImagePickerInController:self animated:YES];
+    if (!_imagePickerController) {
+        _imagePickerController = [[PNImagePickerViewController alloc] init];
+        _imagePickerController.delegate = self;
+    }
+    [_imagePickerController showImagePickerInController:self animated:YES];
 
 }
 
