@@ -9,7 +9,7 @@ PODS:
   - FBSnapshotTestCase/Core (2.0.7)
   - FBSnapshotTestCase/SwiftSupport (2.0.7):
     - FBSnapshotTestCase/Core
-  - PNImagePickerViewController (0.1.0):
+  - PNImagePickerViewController (0.1.1):
     - DGActivityIndicatorView
     - PureLayout
   - PureLayout (3.0.1)
@@ -32,10 +32,8 @@ SPEC CHECKSUMS:
   Expecta: e1c022fcd33910b6be89c291d2775b3fe27a89fe
   Expecta+Snapshots: 29b38dd695bc72a0ed2bea833937d78df41943ba
   FBSnapshotTestCase: 7e85180d0d141a0cf472352edda7e80d7eaeb547
-  PNImagePickerViewController: 8225ee425aa04f1f3716c7ea9786561de3782096
+  PNImagePickerViewController: c3059a8ce0352a54a0fcdb06b5acdc0516129fa5
   PureLayout: f35f5384c9c4e4479df041dbe33ad7577b71ddfb
   Specta: ac94d110b865115fe60ff2c6d7281053c6f8e8a2
 
-PODFILE CHECKSUM: dfe253f9ffc18c2f381e56e26aeba9f722b4a230
-
-COCOAPODS: 1.0.0.beta.3
+COCOAPODS: 0.39.0

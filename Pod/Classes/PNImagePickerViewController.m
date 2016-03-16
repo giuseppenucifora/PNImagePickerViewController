@@ -66,7 +66,6 @@
 
     self.view.backgroundColor = [UIColor clearColor];
 
-
     _imagePickerView = [UIView newAutoLayoutView];
     [_imagePickerView setBackgroundColor:[UIColor whiteColor]];
 
@@ -223,7 +222,35 @@
 - (void) viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 
-    [self getCameraRollImages];
+    if ([AVCaptureDevice respondsToSelector:@selector(requestAccessForMediaType: completionHandler:)]) {
+        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+            // Will get here on both iOS 7 & 8 even though camera permissions weren't required
+            // until iOS 8. So for iOS 7 permission will always be granted.
+            if (granted) {
+                // Permission has been granted. Use dispatch_async for any UI updating
+                // code because this block may be executed in a thread.
+                
+            } else {
+                // Permission has been denied.
+            }
+        }];
+    }
+    
+    [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+        switch (status) {
+            case PHAuthorizationStatusNotDetermined:
+            case PHAuthorizationStatusRestricted:
+            case PHAuthorizationStatusDenied: {
+                
+                break;
+            }
+            case PHAuthorizationStatusAuthorized: {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self getCameraRollImages];
+                });
+            }
+        }
+    }];
 }
 
 #pragma mark - Collection view
