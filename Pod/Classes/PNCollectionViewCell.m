@@ -49,9 +49,7 @@
     [super updateConstraints];
 
     if (!self.didUpdateConstraints) {
-
-        self.didUpdateConstraints = YES;
-
+        
         [self.contentView autoPinEdgesToSuperviewEdges];
 
         [_photoImageView autoPinEdgeToSuperviewEdge:ALEdgeTop withInset:8];
@@ -64,6 +62,8 @@
 
         [_loadingSpinner autoAlignAxisToSuperviewAxis:ALAxisHorizontal];
         [_loadingSpinner autoAlignAxisToSuperviewAxis:ALAxisVertical];
+        
+        self.didUpdateConstraints = YES;
     }
 }
 
