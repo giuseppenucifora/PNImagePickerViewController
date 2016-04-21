@@ -478,7 +478,8 @@
         }
         [_imagePickerView setNeedsUpdateConstraints];
         [_imagePickerView updateConstraintsIfNeeded];
-
+        
+        _isVisible = NO;
         if (animated) {
 
             [UIView animateWithDuration:_animationTime
@@ -516,6 +517,13 @@
             }];
         }
         _isVisible = NO;
+    }
+}
+
+- (void) dismissViewControllerAnimated:(BOOL)animated completion:(void (^ _Nullable)(void))completion {
+    [self dismissAnimated:animated];
+    if (completion) {
+        completion();
     }
 }
 
