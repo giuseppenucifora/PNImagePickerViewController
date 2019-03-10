@@ -551,11 +551,12 @@
 
 - (void)imageEditor:(CLImageEditor*)editor didFinishEditingWithImage:(UIImage*)image
 {
-    if ([delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
-        [delegate imagePicker:self didSelectImage:image];
-    }
-    
     [self dismissAnimated:YES];
+    [editor dismissViewControllerAnimated:YES completion:^{
+        if ([self->delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
+            [self->delegate imagePicker:self didSelectImage:image];
+        }
+    }];
 }
 
 @end
