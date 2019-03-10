@@ -19,7 +19,7 @@
 
 @interface PNImagePickerViewController ()  <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
-#define imagePickerHeight 280.0f
+#define imagePickerHeight 290.0f
 
 @property (readwrite) bool isVisible;
 @property (readwrite) bool haveCamera;
@@ -277,8 +277,8 @@
          the UI, dispatch to the main queue.
          */
         dispatch_async(dispatch_get_main_queue(), ^{
-            if ([delegate respondsToSelector:@selector(imagePicker:donwloadImageWithProgress:)]) {
-                [delegate imagePicker:self donwloadImageWithProgress:progress];
+            if ([self->delegate respondsToSelector:@selector(imagePicker:donwloadImageWithProgress:)]) {
+                [self->delegate imagePicker:self donwloadImageWithProgress:progress];
             }
         });
     };
@@ -311,8 +311,8 @@
          the UI, dispatch to the main queue.
          */
         dispatch_async(dispatch_get_main_queue(), ^{
-            if ([delegate respondsToSelector:@selector(imagePicker:donwloadImageWithProgress:)]) {
-                [delegate imagePicker:self donwloadImageWithProgress:progress];
+            if ([self->delegate respondsToSelector:@selector(imagePicker:donwloadImageWithProgress:)]) {
+                [self->delegate imagePicker:self donwloadImageWithProgress:progress];
             }
         });
     };
@@ -327,8 +327,8 @@
         }
         
         // Show the UIImageView and use it to display the requested image.
-        if ([delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
-            [delegate imagePicker:self didSelectImage:result];
+        if ([self->delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
+            [self->delegate imagePicker:self didSelectImage:result];
         }
         
         [self dismissAnimated:YES];
@@ -358,10 +358,10 @@
         PHFetchResult *allPhotosResult = [PHAsset fetchAssetsWithMediaType:PHAssetMediaTypeImage options:allPhotosOptions];
         [allPhotosResult enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL *stop) {
             if(asset) {
-                [_assets addObject:asset];
+                [self->_assets addObject:asset];
             }
         }];
-        [_collectionView reloadData];
+        [self->_collectionView reloadData];
     });
 }
 
@@ -384,8 +384,8 @@
         picker.sourceType = UIImagePickerControllerSourceTypeCamera;
         picker.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeImage, nil];
         
-        [_targetController presentViewController:picker animated:YES completion:^{
-            [self dismissAnimated:YES];
+        [self presentViewController:picker animated:YES completion:^{
+            
         }];
     }
 }
@@ -396,25 +396,24 @@
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     picker.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeImage, nil];
     
-    [_targetController presentViewController:picker animated:YES completion:^{
-        [self dismissAnimated:YES];
+    [self presentViewController:picker animated:YES completion:^{
+    
     }];
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     UIImage *chosenImage = info[UIImagePickerControllerOriginalImage];
-    
+    [self dismissAnimated:YES];
     [picker dismissViewControllerAnimated:YES completion:^{
-        if ([delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
-            [delegate imagePicker:self didSelectImage:chosenImage];
+        if ([self->delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
+            [self->delegate imagePicker:self didSelectImage:chosenImage];
         }
-        [self dismissAnimated:YES];
     }];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
     [picker dismissViewControllerAnimated:YES completion:^{
-        [self showImagePickerInController:_targetController];
+        [self showImagePickerInController:self->_targetController];
     }];
 }
 
@@ -438,36 +437,38 @@
         
         [_targetController presentViewController:self animated:NO completion:^{
             
-            [_imagePickerView setNeedsUpdateConstraints];
-            [_imagePickerView updateConstraintsIfNeeded];
+            [self->_hideConstraint setConstant:0];
+            [self->_imagePickerView setNeedsUpdateConstraints];
             
             if (animated) {
                 
-                [UIView animateWithDuration:_animationTime
+                [UIView animateWithDuration:self->_animationTime
                                       delay:0.0
                      usingSpringWithDamping:1
                       initialSpringVelocity:0
                                     options:0
                                  animations:^{
-                                     
-                                     [_hideConstraint setConstant:0];
-                                     
-                                     [_backgroundView setAlpha:1];
-                                     
-                                     [_imagePickerView layoutIfNeeded];
-                                 }
-                                 completion:^(BOOL finished) {
-                                     if ([delegate respondsToSelector:@selector(imagePickerDidOpen)]) {
-                                         [delegate imagePickerDidOpen];
-                                     }
-                                 }];
+                    //[_logoImage layoutIfNeeded];
+                    [self.view layoutIfNeeded];
+                                     [self->_backgroundView setAlpha:1];
+                    
+                                     [self->_imagePickerView layoutIfNeeded];
+                    
+                } completion:^(BOOL finished) {
+                    if ([self->delegate respondsToSelector:@selector(imagePickerDidOpen)]) {
+                        [self->delegate imagePickerDidOpen];
+                    }
+                }];
+                
             } else {
                 
-                [_hideConstraint setConstant:0];
+                [self->_backgroundView setAlpha:1];
                 
-                [_backgroundView setAlpha:1];
+                [self->_imagePickerView layoutIfNeeded];
                 
-                [_imagePickerView layoutIfNeeded];
+                if ([self->delegate respondsToSelector:@selector(imagePickerDidOpen)]) {
+                    [self->delegate imagePickerDidOpen];
+                }
             }
         }];
     }
@@ -484,8 +485,9 @@
         if ([delegate respondsToSelector:@selector(imagePickerWillClose)]) {
             [delegate imagePickerWillClose];
         }
+        
+        [_hideConstraint setConstant:imagePickerHeight];
         [_imagePickerView setNeedsUpdateConstraints];
-        [_imagePickerView updateConstraintsIfNeeded];
         
         if (animated) {
             
@@ -495,31 +497,27 @@
                   initialSpringVelocity:0
                                 options:0
                              animations:^{
+                                 [self.view layoutIfNeeded];
+                                 [self->_backgroundView setAlpha:0];
                                  
-                                 [_hideConstraint setConstant:imagePickerHeight];
-                                 
-                                 [_backgroundView setAlpha:0];
-                                 
-                                 [_imagePickerView layoutIfNeeded];
+                                 [self->_imagePickerView layoutIfNeeded];
                              }
                              completion:^(BOOL finished) {
                                  [self dismissViewControllerAnimated:YES completion:^{
-                                     if ([delegate respondsToSelector:@selector(imagePickerDidClose)]) {
-                                         [delegate imagePickerDidClose];
+                                     if ([self->delegate respondsToSelector:@selector(imagePickerDidClose)]) {
+                                         [self->delegate imagePickerDidClose];
                                      }
                                  }];
                              }];
         } else {
-            
-            [_hideConstraint setConstant:imagePickerHeight];
             
             [_backgroundView setAlpha:0];
             
             [_imagePickerView layoutIfNeeded];
             
             [self dismissViewControllerAnimated:NO completion:^{
-                if ([delegate respondsToSelector:@selector(imagePickerDidClose)]) {
-                    [delegate imagePickerDidClose];
+                if ([self->delegate respondsToSelector:@selector(imagePickerDidClose)]) {
+                    [self->delegate imagePickerDidClose];
                 }
             }];
         }

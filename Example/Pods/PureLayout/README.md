@@ -1,5 +1,5 @@
 # [![PureLayout](https://github.com/PureLayout/PureLayout/blob/master/Images/PureLayout.png?raw=true)](#)
-[![Build Status](http://img.shields.io/travis/PureLayout/PureLayout.svg?style=flat)](https://travis-ci.org/PureLayout/PureLayout) [![Test Coverage](http://img.shields.io/coveralls/PureLayout/PureLayout.svg?style=flat)](https://coveralls.io/r/PureLayout/PureLayout) [![Version](http://img.shields.io/cocoapods/v/PureLayout.svg?style=flat)](http://cocoapods.org/?q=PureLayout) [![Platform](http://img.shields.io/cocoapods/p/PureLayout.svg?style=flat)](http://cocoapods.org/?q=PureLayout) [![License](http://img.shields.io/cocoapods/l/PureLayout.svg?style=flat)](LICENSE)
+[![Build Status](https://travis-ci.org/PureLayout/PureLayout.svg?branch=master)](https://travis-ci.org/PureLayout/PureLayout) [![Version](http://img.shields.io/cocoapods/v/PureLayout.svg?style=flat)](http://cocoapods.org/pods/PureLayout) [![Platform](http://img.shields.io/cocoapods/p/PureLayout.svg?style=flat)](http://cocoapods.org/pods/PureLayout) [![License](http://img.shields.io/cocoapods/l/PureLayout.svg?style=flat)](LICENSE)
 
 The ultimate API for iOS & OS X Auto Layout — impressively simple, immensely powerful. PureLayout extends `UIView`/`NSView`, `NSArray`, and `NSLayoutConstraint` with a comprehensive Auto Layout API that is modeled after Apple's own frameworks. PureLayout is a cross-platform Objective-C library that works (and looks!) great in Swift. It is fully backwards-compatible with all versions of iOS and OS X that support Auto Layout.
 
@@ -100,7 +100,7 @@ Additionally, there is one generic attribute type, `ALAttribute`, which is effec
 ### [`UIView`/`NSView`](PureLayout/PureLayout/ALView%2BPureLayout.h)
 ```
 - autoSetContent(CompressionResistance|Hugging)PriorityForAxis:
-- autoCenterInSuperview(Margins): // Margins variant iOS 8.0+ only
+- autoCenterInSuperview(Margins) // Margins variant iOS 8.0+ only
 - autoAlignAxisToSuperview(Margin)Axis: // Margin variant iOS 8.0+ only
 - autoPinEdgeToSuperview(Edge:|Margin:)(withInset:) // Margin variant iOS 8.0+ only
 - autoPinEdgesToSuperview(Edges|Margins)(WithInsets:)(excludingEdge:) // Margins variant iOS 8.0+ only
@@ -110,6 +110,8 @@ Additionally, there is one generic attribute type, `ALAttribute`, which is effec
 - autoSetDimension(s)ToSize:
 - autoConstrainAttribute:toAttribute:ofView:(withOffset:|withMultiplier:)
 - autoPinTo(Top|Bottom)LayoutGuideOfViewController:withInset: // iOS only
+- autoPinEdgeToSuperviewSafeArea: // iOS 11.0+ only
+- autoPinEdgeToSuperviewSafeArea:withInset: // iOS 11.0+ only
 ```
 
 ### [`NSArray`](PureLayout/PureLayout/NSArray%2BPureLayout.h)
@@ -144,16 +146,28 @@ Additionally, there is one generic attribute type, `ALAttribute`, which is effec
 ### Sample Code (Swift)
 PureLayout dramatically simplifies writing Auto Layout code. Let's take a quick look at some examples, using PureLayout from Swift.
 
+Initialize the view using PureLayout initializer:
+
+```swift
+let view1 = UIView(forAutoLayout: ())
+```
+
+If you need to use a different initializer (e.g. in `UIView` subclass), you can also use `configureForAutoLayout`:
+
+```
+view1.configureForAutoLayout() // alternative to UIView.init(forAutoLayout: ())
+```
+
 Here's a constraint between two views created (and automatically activated) using PureLayout:
 
 ```swift
-view1.autoPinEdge(.Top, toEdge: .Bottom, ofView: view2)
+view1.autoPinEdge(.top, toEdge: .bottom, ofView: view2)
 ```
 
 Without PureLayout, here's the equivalent code you'd have to write using Apple's Foundation API directly:
 
 ```swift
-NSLayoutConstraint(item: view1, attribute: .Top, relatedBy: .Equal, toItem: view2, attribute: .Bottom, multiplier: 1.0, constant: 0.0).active = true
+NSLayoutConstraint(item: view1, attribute: .top, relatedBy: .equal, toItem: view2, attribute: .bottom, multiplier: 1.0, constant: 0.0).active = true
 ```
 
 Many APIs of PureLayout create multiple constraints for you under the hood, letting you write highly readable layout code:
@@ -163,13 +177,19 @@ Many APIs of PureLayout create multiple constraints for you under the hood, lett
 logoImageView.autoCenterInSuperview()
 
 // 4 constraints created & activated in one line!
-textContentView.autoPinEdgesToSuperviewEdgesWithInsets(UIEdgeInsets(top: 20.0, left: 5.0, bottom: 10.0, right: 5.0))
+textContentView.autoPinEdgesToSuperviewEdges(with insets: UIEdgeInsets(top: 20.0, left: 5.0, bottom: 10.0, right: 5.0))
 ```
 
 PureLayout always returns the constraints it creates so you have full control:
 
 ```swift
-let constraint = skinnyView.autoMatchDimension(.Height, toDimension: .Width, ofView: tallView)
+let constraint = skinnyView.autoMatchDimension(.height, toDimension: .width, ofView: tallView)
+```
+
+PureLayout supports safearea with iOS 11.0+:
+
+```swift
+view2.autoPinEdge(toSuperviewSafeArea: .top)
 ```
 
 PureLayout supports all Auto Layout features including inequalities, priorities, layout margins, identifiers, and much more. It's a comprehensive, developer-friendly way to use Auto Layout.
@@ -192,7 +212,7 @@ There are quite a few different ways to implement Auto Layout. Here is a quick o
 * Apple [NSLayoutConstraint SDK API](https://developer.apple.com/library/ios/documentation/AppKit/Reference/NSLayoutConstraint_Class/index.html#//apple_ref/occ/clm/NSLayoutConstraint/constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:)
   * Pros: Raw power
   * Cons: Extremely verbose; tedious to write; difficult to read
-* Apple [Visual Format Language](https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/VisualFormatLanguage/VisualFormatLanguage.html)
+* Apple [Visual Format Language](https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/VisualFormatLanguage.html)
   * Pros: Concise; convenient
   * Cons: Doesn't support some use cases; lacks compile-time checking and safety; must learn syntax; hard to debug
 * Apple Interface Builder
