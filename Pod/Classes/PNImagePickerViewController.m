@@ -13,11 +13,12 @@
 #import "PNCollectionViewCell.h"
 #import "NSString+HexColor.h"
 #import <PureLayout/PureLayout.h>
+#import <CLImageEditor/CLImageEditor.h>
 
 
 #pragma mark - PNImagePickerViewController -
 
-@interface PNImagePickerViewController ()  <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface PNImagePickerViewController ()  <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UIImagePickerControllerDelegate, UINavigationControllerDelegate,CLImageEditorDelegate>
 
 #define imagePickerHeight 290.0f
 
@@ -55,7 +56,7 @@
         _targetSize = CGSizeMake(1024, 1024);
         _haveCamera = [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera];
         _animationTime = 0.4;
-        
+        _enableEditMode = NO;
         
     }
     return self;
@@ -327,11 +328,19 @@
         }
         
         // Show the UIImageView and use it to display the requested image.
-        if ([self->delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
-            [self->delegate imagePicker:self didSelectImage:result];
+        if (self->_enableEditMode) {
+            CLImageEditor *editor = [[CLImageEditor alloc] initWithImage:result];
+            editor.delegate = self;
+            
+            [self presentViewController:editor animated:YES completion:nil];
         }
-        
-        [self dismissAnimated:YES];
+        else {
+            if ([self->delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
+                [self->delegate imagePicker:self didSelectImage:result];
+            }
+            
+            [self dismissAnimated:YES];
+        }
     }];
     
 }
@@ -397,18 +406,31 @@
     picker.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeImage, nil];
     
     [self presentViewController:picker animated:YES completion:^{
-    
+        
     }];
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     UIImage *chosenImage = info[UIImagePickerControllerOriginalImage];
-    [self dismissAnimated:YES];
-    [picker dismissViewControllerAnimated:YES completion:^{
-        if ([self->delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
-            [self->delegate imagePicker:self didSelectImage:chosenImage];
-        }
-    }];
+    
+    if (self->_enableEditMode) {
+        [picker dismissViewControllerAnimated:YES completion:^{
+            
+            CLImageEditor *editor = [[CLImageEditor alloc] initWithImage:chosenImage];
+            editor.delegate = self;
+            
+            [self presentViewController:editor animated:YES completion:nil];
+        }];
+    }
+    else {
+        [self dismissAnimated:YES];
+        [picker dismissViewControllerAnimated:YES completion:^{
+            if ([self->delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
+                [self->delegate imagePicker:self didSelectImage:chosenImage];
+            }
+        }];
+    }
+    
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
@@ -448,17 +470,17 @@
                       initialSpringVelocity:0
                                     options:0
                                  animations:^{
-                    //[_logoImage layoutIfNeeded];
-                    [self.view layoutIfNeeded];
+                                     //[_logoImage layoutIfNeeded];
+                                     [self.view layoutIfNeeded];
                                      [self->_backgroundView setAlpha:1];
-                    
+                                     
                                      [self->_imagePickerView layoutIfNeeded];
-                    
-                } completion:^(BOOL finished) {
-                    if ([self->delegate respondsToSelector:@selector(imagePickerDidOpen)]) {
-                        [self->delegate imagePickerDidOpen];
-                    }
-                }];
+                                     
+                                 } completion:^(BOOL finished) {
+                                     if ([self->delegate respondsToSelector:@selector(imagePickerDidOpen)]) {
+                                         [self->delegate imagePickerDidOpen];
+                                     }
+                                 }];
                 
             } else {
                 
@@ -523,6 +545,17 @@
         }
         _isVisible = NO;
     }
+}
+
+#pragma mark- CLImageEditor delegate
+
+- (void)imageEditor:(CLImageEditor*)editor didFinishEditingWithImage:(UIImage*)image
+{
+    if ([delegate respondsToSelector:@selector(imagePicker:didSelectImage:)]) {
+        [delegate imagePicker:self didSelectImage:image];
+    }
+    
+    [self dismissAnimated:YES];
 }
 
 @end

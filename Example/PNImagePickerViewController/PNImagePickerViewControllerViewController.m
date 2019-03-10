@@ -71,6 +71,7 @@
         _imagePickerController = [[PNImagePickerViewController alloc] init];
         _imagePickerController.delegate = self;
     }
+    [_imagePickerController setEnableEditMode:YES];
     [_imagePickerController showImagePickerInController:self animated:YES];
 
 }

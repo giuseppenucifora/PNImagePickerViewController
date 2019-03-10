@@ -1,0 +1,1 @@
+../../../../../CLImageEditor/CLImageEditor/ImageTools/ToolSettings/CLImageToolProtocol.h

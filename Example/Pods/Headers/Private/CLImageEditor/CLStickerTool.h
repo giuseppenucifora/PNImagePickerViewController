@@ -1,0 +1,1 @@
+../../../CLImageEditor/OptionalImageTools/CLStickerTool/CLStickerTool.h

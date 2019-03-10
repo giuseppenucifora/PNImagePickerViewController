@@ -20,7 +20,6 @@
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
-		681785911C69DCB50032DAAC /* PNImagePickerViewController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 681785901C69DCB50032DAAC /* PNImagePickerViewController.framework */; };
 		873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 873B8AEA1B1F5CCA007FD442 /* Main.storyboard */; };
 		AE78532B104C86CFD7E59E56 /* libPods-PNImagePickerViewController_Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C6AEC746978DFB326EAAA7FF /* libPods-PNImagePickerViewController_Tests.a */; };
 		DC5F4864BF4E2B1C54F620F6 /* libPods-PNImagePickerViewController_Example.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C80B5FA595CB4977C47CBE3 /* libPods-PNImagePickerViewController_Example.a */; };
@@ -61,7 +60,7 @@
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
 		681785901C69DCB50032DAAC /* PNImagePickerViewController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PNImagePickerViewController.framework; path = "Pods/../build/Debug-iphoneos/PNImagePickerViewController.framework"; sourceTree = "<group>"; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
-		930DB7C275684056258BA5EF /* PNImagePickerViewController.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = PNImagePickerViewController.podspec; path = ../PNImagePickerViewController.podspec; sourceTree = "<group>"; };
+		930DB7C275684056258BA5EF /* PNImagePickerViewController.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = PNImagePickerViewController.podspec; path = ../PNImagePickerViewController.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		AD447568A76DA895F7B37A24 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		ADC9C57C00FD4B2D4EF4A32E /* Pods-PNImagePickerViewController_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PNImagePickerViewController_Example.release.xcconfig"; path = "Target Support Files/Pods-PNImagePickerViewController_Example/Pods-PNImagePickerViewController_Example.release.xcconfig"; sourceTree = "<group>"; };
 		C6AEC746978DFB326EAAA7FF /* libPods-PNImagePickerViewController_Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PNImagePickerViewController_Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -74,7 +73,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				681785911C69DCB50032DAAC /* PNImagePickerViewController.framework in Frameworks */,
 				6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */,
 				6003F592195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F58E195388D20070C39A /* Foundation.framework in Frameworks */,
@@ -194,7 +192,6 @@
 				43986E6CA155C636B098FB5C /* Pods-PNImagePickerViewController_Tests.debug.xcconfig */,
 				CB8F44A02F3C2331783D2F8C /* Pods-PNImagePickerViewController_Tests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -209,6 +206,7 @@
 				6003F586195388D20070C39A /* Sources */,
 				6003F587195388D20070C39A /* Frameworks */,
 				6003F588195388D20070C39A /* Resources */,
+				C56906A3A098A96D094B8E5B /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -227,6 +225,7 @@
 				6003F5AA195388D20070C39A /* Sources */,
 				6003F5AB195388D20070C39A /* Frameworks */,
 				6003F5AC195388D20070C39A /* Resources */,
+				1A8BC91A508BD0EFA14DD6F1 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -297,6 +296,28 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		1A8BC91A508BD0EFA14DD6F1 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PNImagePickerViewController_Tests/Pods-PNImagePickerViewController_Tests-resources.sh",
+				"${PODS_ROOT}/CLImageEditor/CLImageEditor/CLImageEditor.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/CLImageEditor.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PNImagePickerViewController_Tests/Pods-PNImagePickerViewController_Tests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		2C6565F5C43756D0430E8CA7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -339,6 +360,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C56906A3A098A96D094B8E5B /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PNImagePickerViewController_Example/Pods-PNImagePickerViewController_Example-resources.sh",
+				"${PODS_ROOT}/CLImageEditor/CLImageEditor/CLImageEditor.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/CLImageEditor.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PNImagePickerViewController_Example/Pods-PNImagePickerViewController_Example-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

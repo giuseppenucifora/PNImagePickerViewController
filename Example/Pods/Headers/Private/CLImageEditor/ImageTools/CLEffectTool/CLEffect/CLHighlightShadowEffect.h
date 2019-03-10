@@ -1,0 +1,1 @@
+../../../../../../CLImageEditor/CLImageEditor/ImageTools/CLEffectTool/CLEffect/CLHighlightShadowEffect.h

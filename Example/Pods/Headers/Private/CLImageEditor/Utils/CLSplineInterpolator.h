@@ -1,0 +1,1 @@
+../../../../CLImageEditor/CLImageEditor/Utils/CLSplineInterpolator.h

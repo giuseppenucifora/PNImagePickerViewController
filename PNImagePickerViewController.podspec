@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "PNImagePickerViewController"
-  s.version          = "1.0"
+  s.version          = "1.0.1"
   s.summary          = "PNImagePickerViewController is a fork of jacobsieradzki/JSImagePickerController with iOS8+ PhotoKit support."
 
 # This description is used to generate tags and improve search results.
@@ -34,4 +34,5 @@ Pod::Spec.new do |s|
   s.frameworks = 'Photos', 'PhotosUI'
   s.dependency 'PureLayout'
   s.dependency 'DGActivityIndicatorView'
+  s.dependency 'CLImageEditor/AllTools'
 end

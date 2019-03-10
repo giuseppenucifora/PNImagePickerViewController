@@ -49,6 +49,8 @@
 
 @property (readonly) bool isVisible;
 
+@property (nonatomic) bool enableEditMode;
+
 @property (nonatomic, strong) UICollectionView *collectionView;
 
 @property (nonatomic, strong) UIButton *photoLibraryBtn;
